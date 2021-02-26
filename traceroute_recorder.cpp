@@ -1,4 +1,4 @@
-// Traceroute-recorder.cpp
+// tracert-recorder.cpp
 // Nathaniel Morrow Feb, 2021
 // written for Windows machines, will require slight modifications for Unix-based systems.
 
