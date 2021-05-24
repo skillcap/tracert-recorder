@@ -52,6 +52,7 @@ void helper(string input)
     cout << "\nBeginning csv conversion for " << input << " to data" << threadNum + ".csv.";
     //takes user input and does a system call for tracert then redirects the tracert. it is stored in the test.txt file.
     tracertToCsv("traceData" + threadNum + ".txt", "data" + threadNum + ".csv");
+    //There's a race condition for output here.
     cout << "\"Tracert " << input << "\" has been successfully recorded into data" << threadNum + ".csv.";
 }
 
