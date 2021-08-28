@@ -71,6 +71,7 @@ void helper(string input)
     mtx.lock();
     cout << "\"Tracert " << input << "\" has been successfully recorded into data" << threadNum + ".csv.\n\n";
     mtx.unlock();
+    return;
 }
 
 //takes a recorded tracert and converts to csv
