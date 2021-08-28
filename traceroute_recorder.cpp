@@ -1,5 +1,5 @@
 // Traceroute.cpp
-// Nathaniel Morrow Feb, 2021
+// Nathaniel Morrow Feb, 2021 (Updated Aug 2021)
 // written for Windows machines, will require slight modifications for Unix-based systems.
 
 #include <iostream>
@@ -8,31 +8,42 @@
 #include <cstring>
 #include <thread>
 #include <sstream>
+#include <mutex>
 
 using namespace std;
 
 void tracertToCsv(string inFile, string outFile);
 void helper(string input);
 
+//global mutex to avoid race conditions on output
+mutex mtx;
+
 int main(int argc, char *argv[])
 {
     string input;
     vector<thread> threads;
 
-    cout << "Welcome to Traceroute Testing and Recording!\n\n";
+    cout << "Welcome to the Traceroute recording tool!\n\n";
 
     /* Asks user for input on what IP or URL tracert should 
     be called on launch threads for tracert until asked to stop.
     This can be easily converted to read a file instead ;) */
-    while (1)
+    while(1)
     {
+        mtx.lock();
         cout << "What IP(s) or URL(s) would you like to Tracert?\n"
              << "Enter x when finished: ";
         cin >> input;
         if (input == "x" || input == "X")
+        {
+            mtx.unlock();
             break;
+        }
+        mtx.unlock();
         threads.emplace_back(helper, input);
-        cout << "\"Tracert " << input << "\" has started on thread " << threads.size() + 1 << ".\n\n";
+        mtx.lock();
+        cout << "\n\"Tracert " << input << "\" has started on thread " << threads.size() + 1 << ".\n\n";
+        mtx.unlock();
     }
 
     for (thread &t : threads)
@@ -49,11 +60,17 @@ void helper(string input)
     ss << this_thread::get_id();
     string threadNum = ss.str();
     system(("tracert " + input + " > traceData" + threadNum + ".txt").c_str());
-    cout << "\nBeginning csv conversion for " << input << " to data" << threadNum + ".csv.";
+    //critical section - output
+    mtx.lock();
+    cout << "\nBeginning csv conversion for " << input << " to data" << threadNum + ".csv.\n\n";
+    mtx.unlock();
+
     //takes user input and does a system call for tracert then redirects the tracert. it is stored in the test.txt file.
     tracertToCsv("traceData" + threadNum + ".txt", "data" + threadNum + ".csv");
-    //There's a race condition for output here.
-    cout << "\"Tracert " << input << "\" has been successfully recorded into data" << threadNum + ".csv.";
+    //Critical section - output
+    mtx.lock();
+    cout << "\"Tracert " << input << "\" has been successfully recorded into data" << threadNum + ".csv.\n\n";
+    mtx.unlock();
 }
 
 //takes a recorded tracert and converts to csv
