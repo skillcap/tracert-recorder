@@ -82,7 +82,7 @@ void tracertToCsv(string inFile, string outFile)
     for (int i = 0; i < 4; i++)
         getline(input, temp);
     input >> temp;
-    while (temp != "Trace" && temp != "complete.")
+    while (temp != "Trace" && temp != "complete." && temp != "Unable")
     {
         output << temp;
         output << ',';
